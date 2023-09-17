@@ -225,7 +225,7 @@ func New(items []Item, delegate ItemDelegate, width, height int) Model {
 	m := Model{
 		showTitle:             true,
 		showFilter:            true,
-		showStatusBar:         true,
+		showStatusBar:         false,
 		showPagination:        true,
 		showHelp:              true,
 		itemNameSingular:      "item",
@@ -234,7 +234,6 @@ func New(items []Item, delegate ItemDelegate, width, height int) Model {
 		KeyMap:                DefaultKeyMap(),
 		Filter:                DefaultFilter,
 		Styles:                styles,
-		Title:                 "List",
 		FilterInput:           filterInput,
 		StatusMessageLifetime: time.Second,
 
@@ -251,6 +250,7 @@ func New(items []Item, delegate ItemDelegate, width, height int) Model {
 		spinner:         sp,
 		Help:            help.New(),
 	}
+	m.SetShowTitle(m.Title != "")
 
 	m.updatePagination()
 	m.updateKeybindings()
@@ -472,12 +472,28 @@ func (m *Model) ToggleItem() {
 	}
 }
 
+// ToggledItems returns the slice of item indices.
 func (m Model) ToggledItems() []int {
 	var items []int
 	for k, _ := range m.toggledItems {
 		items = append(items, k)
 	}
 	return items
+}
+
+// SetPrefix sets the item prefix.
+func (m *Model) SetPrefix(pre string) {
+	m.prefix = pre
+}
+
+// SetToggledItemPrefix sets the toggled item prefix.
+func (m *Model) SetToggledItemPrefix(pre string) {
+	m.toggledPrefix = pre
+}
+
+// SetUntoggledItemPrefix sets the untoggled item prefix.
+func (m *Model) SetUntoggledItemPrefix(pre string) {
+	m.untoggledPrefix = pre
 }
 
 // SelectedItemIsToggled returns whether or not the current selected item in a
@@ -797,8 +813,11 @@ func (m *Model) updatePagination() {
 	if m.showHelp {
 		availHeight -= lipgloss.Height(m.helpView())
 	}
-
-	m.Paginator.PerPage = max(1, availHeight/(m.delegate.Height()+m.delegate.Spacing()))
+	ih := m.delegate.Height() + m.delegate.Spacing() - 1
+	if ih == 0 {
+		ih = 1
+	}
+	m.Paginator.PerPage = max(1, availHeight/ih)
 
 	if pages := len(m.VisibleItems()); pages < 1 {
 		m.Paginator.SetTotalPages(1)
@@ -828,6 +847,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmds []tea.Cmd
 
 	switch msg := msg.(type) {
+	case tea.WindowSizeMsg:
+		//m.SetSize(msg.Width, msg.Height)
 	case tea.KeyMsg:
 		if key.Matches(msg, m.KeyMap.ForceQuit) {
 			return m, tea.Quit

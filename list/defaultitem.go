@@ -103,7 +103,7 @@ type DefaultDelegate struct {
 func NewDefaultDelegate() DefaultDelegate {
 	return DefaultDelegate{
 		Styles:  NewDefaultItemStyles(),
-		height:  1,
+		height:  2,
 		spacing: 1,
 	}
 }
@@ -147,7 +147,6 @@ func (d DefaultDelegate) Render(w io.Writer, m Model, index int, item Item) {
 		title, desc  string
 		matchedRunes []int
 		s            = &d.Styles
-		prefix       = m.prefix
 	)
 
 	if i, ok := item.(DefaultItem); ok {
@@ -163,7 +162,7 @@ func (d DefaultDelegate) Render(w io.Writer, m Model, index int, item Item) {
 	}
 
 	// Prevent text from exceeding list width
-	textwidth := uint(m.width - s.NormalTitle.GetPaddingLeft() - s.NormalTitle.GetPaddingRight())
+	textwidth := uint(m.width - s.NormalTitle.GetPaddingLeft() - s.NormalTitle.GetPaddingRight() - s.Prefix.GetPaddingLeft())
 	title = truncate.StringWithTail(title, textwidth, ellipsis)
 	if d.ShowDescription {
 		var lines []string
@@ -178,11 +177,17 @@ func (d DefaultDelegate) Render(w io.Writer, m Model, index int, item Item) {
 
 	// Conditions
 	var (
+		prefix      = " "
 		isSelected  = index == m.Index()
 		emptyFilter = m.FilterState() == Filtering && m.FilterValue() == ""
 		isFiltered  = m.FilterState() == Filtering || m.FilterState() == FilterApplied
 	)
 
+	if isSelected {
+		prefix = m.prefix
+	}
+
+	// style prefix
 	if m.noLimit {
 		if _, ok := m.toggledItems[index]; ok {
 			prefix = s.Prefix.Render(m.toggledPrefix)

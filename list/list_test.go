@@ -3,10 +3,12 @@ package list
 import (
 	"fmt"
 	"io"
+	"os"
 	"strings"
 	"testing"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"golang.org/x/term"
 )
 
 type item string
@@ -68,11 +70,13 @@ func TestList(t *testing.T) {
 		items = append(items, newDefaultItem(c))
 	}
 
+	//w, h := TermSize()
+
 	del := NewDefaultDelegate()
 	//del.ShowDescription = false
-	m := New(items, del, 10, 30)
-	//m.SetNoLimit()
-	m.SetShowTitle(false)
+	m := New(items, del, 100, 20)
+	m.SetNoLimit()
+	//m.SetShowTitle(false)
 	//m := testList{
 	//Model: &l,
 	//}
@@ -86,6 +90,11 @@ func TestList(t *testing.T) {
 		t.Errorf("toggled items %v != toggled %v\n", m.toggledItems, items)
 
 	}
+}
+
+func TermSize() (int, int) {
+	w, h, _ := term.GetSize(int(os.Stdin.Fd()))
+	return w, h
 }
 
 func TestStatusBarItemName(t *testing.T) {
