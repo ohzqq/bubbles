@@ -11,7 +11,41 @@ import (
 
 type item string
 
-func (i item) FilterValue() string { return "" }
+type defaultItem struct {
+	title string
+	desc  string
+}
+
+type testList struct {
+	*Model
+}
+
+func (m testList) Init() tea.Cmd { return nil }
+
+//func (m testList) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+//  l, cmd := m.Model.Update(msg)
+//  m.Model = &l
+//  return m, cmd
+//}
+
+func (i defaultItem) Title() string {
+	return i.title
+}
+
+func (i defaultItem) Description() string {
+	return ""
+}
+
+func (i defaultItem) FilterValue() string { return i.title }
+
+func newDefaultItem(s string) defaultItem {
+	return defaultItem{
+		title: s,
+		desc:  "",
+	}
+}
+
+func (i item) FilterValue() string { return string(i) }
 
 type itemDelegate struct{}
 
@@ -26,6 +60,32 @@ func (d itemDelegate) Render(w io.Writer, m Model, index int, listItem Item) {
 
 	str := fmt.Sprintf("%d. %s", index+1, i)
 	fmt.Fprint(w, m.Styles.TitleBar.Render(str))
+}
+
+func TestList(t *testing.T) {
+	var items []Item
+	for _, c := range itemSlice {
+		items = append(items, newDefaultItem(c))
+	}
+
+	del := NewDefaultDelegate()
+	//del.ShowDescription = false
+	m := New(items, del, 10, 30)
+	//m.SetNoLimit()
+	m.SetShowTitle(false)
+	//m := testList{
+	//Model: &l,
+	//}
+	p := tea.NewProgram(m)
+	_, err := p.Run()
+	if err != nil {
+		t.Error(err)
+	}
+
+	if items := m.ToggledItems(); len(items) != len(m.toggledItems) {
+		t.Errorf("toggled items %v != toggled %v\n", m.toggledItems, items)
+
+	}
 }
 
 func TestStatusBarItemName(t *testing.T) {
@@ -71,4 +131,75 @@ func TestCustomStatusBarItemName(t *testing.T) {
 	if !strings.Contains(list.statusView(), expected) {
 		t.Fatalf("Error: expected view to contain %s", expected)
 	}
+}
+
+var itemSlice = []string{
+	"Artichoke",
+	"Baking Flour",
+	"Bananas",
+	"Barley",
+	"Bean Sprouts",
+	"Bitter Melon",
+	"Blood Orange",
+	"Brown Sugar",
+	"Cashew Apple",
+	"Cashews",
+	"Cat Food",
+	"Coconut Milk",
+	"Cucumber",
+	"Curry Paste",
+	"Currywurst",
+	"Dill",
+	"Dragonfruit",
+	"Dried Shrimp",
+	"Eggs",
+	"Fish Cake",
+	"Furikake",
+	"Garlic",
+	"Gherkin",
+	"Ginger",
+	"Granulated Sugar",
+	"Grapefruit",
+	"Green Onion",
+	"Hazelnuts",
+	"Heavy whipping cream",
+	"Honey Dew",
+	"Horseradish",
+	"Jicama",
+	"Kohlrabi",
+	"Leeks",
+	"Lentils",
+	"Licorice Root",
+	"Meyer Lemons",
+	"Milk",
+	"Molasses",
+	"Muesli",
+	"Nectarine",
+	"Niagamo Root",
+	"Nopal",
+	"Nutella",
+	"Oat Milk",
+	"Oatmeal",
+	"Olives",
+	"Papaya",
+	"Party Gherkin",
+	"Peppers",
+	"Persian Lemons",
+	"Pickle",
+	"Pineapple",
+	"Plantains",
+	"Pocky",
+	"Powdered Sugar",
+	"Quince",
+	"Radish",
+	"Ramps",
+	"Star Anise",
+	"Sweet Potato",
+	"Tamarind",
+	"Unsalted Butter",
+	"Watermelon",
+	"Weißwurst",
+	"Yams",
+	"Yeast",
+	"Yuzu",
 }

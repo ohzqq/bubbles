@@ -28,6 +28,8 @@ type DefaultItemStyles struct {
 
 	// Characters matching the current filter, if any.
 	FilterMatch lipgloss.Style
+
+	Prefix lipgloss.Style
 }
 
 // NewDefaultItemStyles returns style definitions for a default item. See
@@ -35,23 +37,29 @@ type DefaultItemStyles struct {
 func NewDefaultItemStyles() (s DefaultItemStyles) {
 	s.NormalTitle = lipgloss.NewStyle().
 		Foreground(lipgloss.AdaptiveColor{Light: "#1a1a1a", Dark: "#dddddd"}).
-		Padding(0, 0, 0, 2)
+		Padding(0, 0, 0, 1)
 
 	s.NormalDesc = s.NormalTitle.Copy().
 		Foreground(lipgloss.AdaptiveColor{Light: "#A49FA5", Dark: "#777777"})
 
 	s.SelectedTitle = lipgloss.NewStyle().
-		Border(lipgloss.NormalBorder(), false, false, false, true).
-		BorderForeground(lipgloss.AdaptiveColor{Light: "#F793FF", Dark: "#AD58B4"}).
-		Foreground(lipgloss.AdaptiveColor{Light: "#EE6FF8", Dark: "#EE6FF8"}).
+		Foreground(lipgloss.AdaptiveColor{Light: "#afffff", Dark: "#afffaf"}).
 		Padding(0, 0, 0, 1)
+	//Border(lipgloss.NormalBorder(), false, false, false, true).
+
+	//BorderForeground(lipgloss.AdaptiveColor{Light: "#F793FF", Dark: "#AD58B4"}).
+	//Foreground(lipgloss.AdaptiveColor{Light: "#EE6FF8", Dark: "#EE6FF8"}).
+	//Padding(0, 0, 0, 1)
+
+	s.Prefix = lipgloss.NewStyle().
+		Foreground(lipgloss.AdaptiveColor{Light: "#EE6FF8", Dark: "#EE6FF8"})
 
 	s.SelectedDesc = s.SelectedTitle.Copy().
 		Foreground(lipgloss.AdaptiveColor{Light: "#F793FF", Dark: "#AD58B4"})
 
 	s.DimmedTitle = lipgloss.NewStyle().
 		Foreground(lipgloss.AdaptiveColor{Light: "#A49FA5", Dark: "#777777"}).
-		Padding(0, 0, 0, 2)
+		Padding(0, 0, 0, 1)
 
 	s.DimmedDesc = s.DimmedTitle.Copy().
 		Foreground(lipgloss.AdaptiveColor{Light: "#C2B8C2", Dark: "#4D4D4D"})
@@ -94,10 +102,9 @@ type DefaultDelegate struct {
 // NewDefaultDelegate creates a new delegate with default styles.
 func NewDefaultDelegate() DefaultDelegate {
 	return DefaultDelegate{
-		ShowDescription: true,
-		Styles:          NewDefaultItemStyles(),
-		height:          2,
-		spacing:         1,
+		Styles:  NewDefaultItemStyles(),
+		height:  1,
+		spacing: 1,
 	}
 }
 
@@ -140,6 +147,7 @@ func (d DefaultDelegate) Render(w io.Writer, m Model, index int, item Item) {
 		title, desc  string
 		matchedRunes []int
 		s            = &d.Styles
+		prefix       = m.prefix
 	)
 
 	if i, ok := item.(DefaultItem); ok {
@@ -175,6 +183,14 @@ func (d DefaultDelegate) Render(w io.Writer, m Model, index int, item Item) {
 		isFiltered  = m.FilterState() == Filtering || m.FilterState() == FilterApplied
 	)
 
+	if m.noLimit {
+		if _, ok := m.toggledItems[index]; ok {
+			prefix = s.Prefix.Render(m.toggledPrefix)
+		} else {
+			prefix = s.Prefix.Render(m.untoggledPrefix)
+		}
+	}
+
 	if isFiltered && index < len(m.filteredItems) {
 		// Get indices of matched characters
 		matchedRunes = m.MatchesForItem(index)
@@ -204,10 +220,10 @@ func (d DefaultDelegate) Render(w io.Writer, m Model, index int, item Item) {
 	}
 
 	if d.ShowDescription {
-		fmt.Fprintf(w, "%s\n%s", title, desc)
+		fmt.Fprintf(w, "%s%s\n%s", prefix, title, desc)
 		return
 	}
-	fmt.Fprintf(w, "%s", title)
+	fmt.Fprintf(w, "%s%s", prefix, title)
 }
 
 // ShortHelp returns the delegate's short help.

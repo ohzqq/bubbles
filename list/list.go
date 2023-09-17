@@ -186,6 +186,14 @@ type Model struct {
 	// The master set of items we're working with.
 	items []Item
 
+	// The toggledItems items of a multiselect list.
+	toggledItems    map[int]struct{}
+	prefix          string
+	toggledPrefix   string
+	untoggledPrefix string
+	limit           int
+	noLimit         bool
+
 	// Filtered items we're currently displaying. Filtering, toggles and so on
 	// will alter this slice so we can show what is relevant. For that reason,
 	// this field should be considered ephemeral.
@@ -230,18 +238,27 @@ func New(items []Item, delegate ItemDelegate, width, height int) Model {
 		FilterInput:           filterInput,
 		StatusMessageLifetime: time.Second,
 
-		width:     width,
-		height:    height,
-		delegate:  delegate,
-		items:     items,
-		Paginator: p,
-		spinner:   sp,
-		Help:      help.New(),
+		width:           width,
+		height:          height,
+		delegate:        delegate,
+		items:           items,
+		toggledItems:    make(map[int]struct{}),
+		prefix:          ">",
+		toggledPrefix:   "◉",
+		untoggledPrefix: "○",
+		limit:           1,
+		Paginator:       p,
+		spinner:         sp,
+		Help:            help.New(),
 	}
 
 	m.updatePagination()
 	m.updateKeybindings()
 	return m
+}
+
+func (m Model) Init() tea.Cmd {
+	return nil
 }
 
 // NewModel returns a new model with sensible defaults.
@@ -443,6 +460,44 @@ func (m Model) SelectedItem() Item {
 	}
 
 	return items[i]
+}
+
+// ToggleItem toggles the current selected item in a multi-select list.
+func (m *Model) ToggleItem() {
+	idx := m.Index()
+	if _, ok := m.toggledItems[idx]; ok {
+		delete(m.toggledItems, idx)
+	} else {
+		m.toggledItems[idx] = struct{}{}
+	}
+}
+
+func (m Model) ToggledItems() []int {
+	var items []int
+	for k, _ := range m.toggledItems {
+		items = append(items, k)
+	}
+	return items
+}
+
+// SelectedItemIsToggled returns whether or not the current selected item in a
+// multi-select list is toggled.
+func (m *Model) SelectedItemIsToggled() bool {
+	idx := m.Index()
+	if _, ok := m.toggledItems[idx]; ok {
+		return true
+	}
+	return false
+}
+
+// SetNoLimit allows all items in a list to be toggled.
+func (m *Model) SetNoLimit() {
+	m.noLimit = true
+}
+
+// SetLimit sets the max number of items that can be toggled.
+func (m *Model) SetLimit(n int) {
+	m.limit = n
 }
 
 // MatchesForItem returns rune positions matched by the current filter, if any.
@@ -711,6 +766,7 @@ func (m *Model) updateKeybindings() {
 		m.KeyMap.ClearFilter.SetEnabled(m.filterState == FilterApplied)
 		m.KeyMap.CancelWhileFiltering.SetEnabled(false)
 		m.KeyMap.AcceptWhileFiltering.SetEnabled(false)
+		m.KeyMap.ToggleItem.SetEnabled(true)
 		m.KeyMap.Quit.SetEnabled(!m.disableQuitKeybindings)
 
 		if m.Help.ShowAll {
@@ -768,7 +824,7 @@ func (m *Model) hideStatusMessage() {
 }
 
 // Update is the Bubble Tea update loop.
-func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
+func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmds []tea.Cmd
 
 	switch msg := msg.(type) {
@@ -836,6 +892,9 @@ func (m *Model) handleBrowsing(msg tea.Msg) tea.Cmd {
 		case key.Matches(msg, m.KeyMap.GoToEnd):
 			m.Paginator.Page = m.Paginator.TotalPages - 1
 			m.cursor = m.Paginator.ItemsOnPage(numItems) - 1
+
+		case key.Matches(msg, m.KeyMap.ToggleItem):
+			m.ToggleItem()
 
 		case key.Matches(msg, m.KeyMap.Filter):
 			m.hideStatusMessage()
@@ -1184,7 +1243,7 @@ func (m Model) populatedView() string {
 		for i, item := range docs {
 			m.delegate.Render(&b, m, i+start, item)
 			if i != len(docs)-1 {
-				fmt.Fprint(&b, strings.Repeat("\n", m.delegate.Spacing()+1))
+				fmt.Fprint(&b, strings.Repeat("\n", m.delegate.Spacing()))
 			}
 		}
 	}
