@@ -843,12 +843,12 @@ func (m *Model) hideStatusMessage() {
 }
 
 // Update is the Bubble Tea update loop.
-func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	var cmds []tea.Cmd
 
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
-		//m.SetSize(msg.Width, msg.Height)
+		m.SetSize(msg.Width, msg.Height)
 	case tea.KeyMsg:
 		if key.Matches(msg, m.KeyMap.ForceQuit) {
 			return m, tea.Quit
@@ -916,6 +916,7 @@ func (m *Model) handleBrowsing(msg tea.Msg) tea.Cmd {
 
 		case key.Matches(msg, m.KeyMap.ToggleItem):
 			m.ToggleItem()
+			m.CursorDown()
 
 		case key.Matches(msg, m.KeyMap.Filter):
 			m.hideStatusMessage()

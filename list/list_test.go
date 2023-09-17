@@ -24,11 +24,11 @@ type testList struct {
 
 func (m testList) Init() tea.Cmd { return nil }
 
-//func (m testList) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-//  l, cmd := m.Model.Update(msg)
-//  m.Model = &l
-//  return m, cmd
-//}
+func (m testList) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	l, cmd := m.Model.Update(msg)
+	m.Model = &l
+	return m, cmd
+}
 
 func (i defaultItem) Title() string {
 	return i.title
@@ -74,12 +74,12 @@ func TestList(t *testing.T) {
 
 	del := NewDefaultDelegate()
 	//del.ShowDescription = false
-	m := New(items, del, 100, 20)
-	m.SetNoLimit()
+	l := New(items, del, 100, 20)
+	l.SetNoLimit()
 	//m.SetShowTitle(false)
-	//m := testList{
-	//Model: &l,
-	//}
+	m := testList{
+		Model: &l,
+	}
 	p := tea.NewProgram(m)
 	_, err := p.Run()
 	if err != nil {
