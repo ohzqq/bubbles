@@ -223,7 +223,6 @@ func New(items []Item, delegate ItemDelegate, width, height int) Model {
 	p.InactiveDot = styles.InactivePaginationDot.String()
 
 	m := Model{
-		showTitle:             true,
 		showFilter:            true,
 		showStatusBar:         false,
 		showPagination:        true,
@@ -813,11 +812,8 @@ func (m *Model) updatePagination() {
 	if m.showHelp {
 		availHeight -= lipgloss.Height(m.helpView())
 	}
-	ih := m.delegate.Height() + m.delegate.Spacing() - 1
-	if ih == 0 {
-		ih = 1
-	}
-	m.Paginator.PerPage = max(1, availHeight/ih)
+
+	m.Paginator.PerPage = max(1, availHeight/(m.delegate.Height()+m.delegate.Spacing()))
 
 	if pages := len(m.VisibleItems()); pages < 1 {
 		m.Paginator.SetTotalPages(1)
@@ -848,7 +844,8 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
-		m.SetSize(msg.Width, msg.Height)
+		m.setSize(msg.Width, msg.Height)
+
 	case tea.KeyMsg:
 		if key.Matches(msg, m.KeyMap.ForceQuit) {
 			return m, tea.Quit
@@ -1089,29 +1086,34 @@ func (m Model) View() string {
 		sections    []string
 		availHeight = m.height
 	)
+	//println(availHeight)
 
 	if m.showTitle || (m.showFilter && m.filteringEnabled) {
 		v := m.titleView()
 		sections = append(sections, v)
 		availHeight -= lipgloss.Height(v)
+		//println(lipgloss.Height(v))
 	}
 
 	if m.showStatusBar {
 		v := m.statusView()
 		sections = append(sections, v)
 		availHeight -= lipgloss.Height(v)
+		//println(lipgloss.Height(v))
 	}
 
 	var pagination string
 	if m.showPagination {
 		pagination = m.paginationView()
 		availHeight -= lipgloss.Height(pagination)
+		//println(lipgloss.Height(pagination))
 	}
 
 	var help string
 	if m.showHelp {
 		help = m.helpView()
 		availHeight -= lipgloss.Height(help)
+		//println(lipgloss.Height(help))
 	}
 
 	content := lipgloss.NewStyle().Height(availHeight).Render(m.populatedView())
@@ -1239,7 +1241,7 @@ func (m Model) paginationView() string {
 
 	style := m.Styles.PaginationStyle
 	if m.delegate.Spacing() == 0 && style.GetMarginTop() == 0 {
-		style = style.Copy().MarginTop(1)
+		//style = style.Copy().MarginTop(1)
 	}
 
 	return style.Render(s)

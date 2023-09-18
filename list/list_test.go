@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 	"golang.org/x/term"
 )
 
@@ -22,9 +23,16 @@ type testList struct {
 	*Model
 }
 
+var appStyle = lipgloss.NewStyle().Padding(1, 2)
+
 func (m testList) Init() tea.Cmd { return nil }
 
 func (m testList) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	//switch msg := msg.(type) {
+	//case tea.WindowSizeMsg:
+	//m.SetSize(msg.Width, msg.Height)
+	//m.SetHeight(msg.Height)
+	//}
 	l, cmd := m.Model.Update(msg)
 	m.Model = &l
 	return m, cmd
@@ -66,15 +74,19 @@ func (d itemDelegate) Render(w io.Writer, m Model, index int, listItem Item) {
 
 func TestList(t *testing.T) {
 	var items []Item
-	for _, c := range itemSlice {
+	for _, c := range itemSlice[:10] {
 		items = append(items, newDefaultItem(c))
 	}
 
+	w := 100
+	h := 20
 	//w, h := TermSize()
+	//println(w)
+	//println(h)
 
 	del := NewDefaultDelegate()
 	//del.ShowDescription = false
-	l := New(items, del, 100, 20)
+	l := New(items, del, w, h)
 	l.SetNoLimit()
 	//m.SetShowTitle(false)
 	m := testList{

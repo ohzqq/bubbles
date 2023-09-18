@@ -45,11 +45,6 @@ func NewDefaultItemStyles() (s DefaultItemStyles) {
 	s.SelectedTitle = lipgloss.NewStyle().
 		Foreground(lipgloss.AdaptiveColor{Light: "#afffff", Dark: "#afffaf"}).
 		Padding(0, 0, 0, 1)
-	//Border(lipgloss.NormalBorder(), false, false, false, true).
-
-	//BorderForeground(lipgloss.AdaptiveColor{Light: "#F793FF", Dark: "#AD58B4"}).
-	//Foreground(lipgloss.AdaptiveColor{Light: "#EE6FF8", Dark: "#EE6FF8"}).
-	//Padding(0, 0, 0, 1)
 
 	s.Prefix = lipgloss.NewStyle().
 		Foreground(lipgloss.AdaptiveColor{Light: "#EE6FF8", Dark: "#EE6FF8"})

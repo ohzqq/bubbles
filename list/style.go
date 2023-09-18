@@ -45,7 +45,7 @@ func DefaultStyles() (s Styles) {
 	verySubduedColor := lipgloss.AdaptiveColor{Light: "#DDDADA", Dark: "#3C3C3C"}
 	subduedColor := lipgloss.AdaptiveColor{Light: "#9B9B9B", Dark: "#5C5C5C"}
 
-	s.TitleBar = lipgloss.NewStyle().Padding(0, 0, 1, 2)
+	s.TitleBar = lipgloss.NewStyle().Padding(0, 0, 0, 2)
 
 	s.Title = lipgloss.NewStyle().
 		Background(lipgloss.Color("62")).
@@ -65,7 +65,7 @@ func DefaultStyles() (s Styles) {
 
 	s.StatusBar = lipgloss.NewStyle().
 		Foreground(lipgloss.AdaptiveColor{Light: "#A49FA5", Dark: "#777777"}).
-		Padding(0, 0, 1, 2)
+		Padding(0, 0, 0, 2)
 
 	s.StatusEmpty = lipgloss.NewStyle().Foreground(subduedColor)
 
@@ -81,7 +81,7 @@ func DefaultStyles() (s Styles) {
 
 	s.PaginationStyle = lipgloss.NewStyle().PaddingLeft(2) //nolint:gomnd
 
-	s.HelpStyle = lipgloss.NewStyle().Padding(1, 0, 0, 2)
+	s.HelpStyle = lipgloss.NewStyle().Padding(0, 0, 0, 2)
 
 	s.ActivePaginationDot = lipgloss.NewStyle().
 		Foreground(lipgloss.AdaptiveColor{Light: "#847A85", Dark: "#979797"}).
