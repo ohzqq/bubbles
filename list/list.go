@@ -10,15 +10,15 @@ import (
 	"strings"
 	"time"
 
-	"github.com/charmbracelet/bubbles/help"
-	"github.com/charmbracelet/bubbles/key"
-	"github.com/charmbracelet/bubbles/paginator"
-	"github.com/charmbracelet/bubbles/spinner"
-	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/muesli/reflow/ansi"
 	"github.com/muesli/reflow/truncate"
+	"github.com/ohzqq/bubbles/help"
+	"github.com/ohzqq/bubbles/key"
+	"github.com/ohzqq/bubbles/paginator"
+	"github.com/ohzqq/bubbles/spinner"
+	"github.com/ohzqq/bubbles/textinput"
 	"github.com/sahilm/fuzzy"
 )
 
