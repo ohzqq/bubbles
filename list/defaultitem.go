@@ -7,8 +7,8 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/charmbracelet/ohzqq/key"
 	"github.com/muesli/reflow/truncate"
+	"github.com/ohzqq/bubbles/key"
 )
 
 // DefaultItemStyles defines styling for a default list item.
