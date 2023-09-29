@@ -523,7 +523,7 @@ func (m Model) Limit() int {
 // MultiSelect is a convenience method to check if more than one item can be
 // toggled.
 func (m Model) MultiSelect() bool {
-	if noLimit {
+	if m.noLimit {
 		return true
 	}
 	if m.limit > 1 {
