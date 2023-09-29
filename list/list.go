@@ -515,6 +515,23 @@ func (m *Model) SetLimit(n int) {
 	m.limit = n
 }
 
+// Limit returns the max number of items that can be toggled.
+func (m Model) Limit() int {
+	return m.limit
+}
+
+// MultiSelect is a convenience method to check if more than one item can be
+// toggled.
+func (m Model) MultiSelect() bool {
+	if noLimit {
+		return true
+	}
+	if m.limit > 1 {
+		return true
+	}
+	return false
+}
+
 // MatchesForItem returns rune positions matched by the current filter, if any.
 // Use this to style runes matched by the active filter.
 //
