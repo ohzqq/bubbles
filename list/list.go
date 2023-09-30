@@ -176,8 +176,6 @@ type Model struct {
 	FilterInput textinput.Model
 	filterState FilterState
 
-	listType ListType
-
 	// How long status messages should stay visible. By default this is
 	// 1 second.
 	StatusMessageLifetime time.Duration
@@ -194,7 +192,6 @@ type Model struct {
 	toggledPrefix   string
 	untoggledPrefix string
 	limit           int
-	noLimit         bool
 
 	// Filtered items we're currently displaying. Filtering, toggles and so on
 	// will alter this slice so we can show what is relevant. For that reason,
@@ -229,6 +226,7 @@ func New(items []Item, delegate ItemDelegate, width, height int) Model {
 		showStatusBar:         false,
 		showPagination:        true,
 		showHelp:              true,
+		showTitle:             true,
 		itemNameSingular:      "item",
 		itemNamePlural:        "items",
 		filteringEnabled:      true,
@@ -251,7 +249,6 @@ func New(items []Item, delegate ItemDelegate, width, height int) Model {
 		spinner:         sp,
 		Help:            help.New(),
 	}
-	m.SetShowTitle(m.Title != "")
 
 	m.updatePagination()
 	m.updateKeybindings()
@@ -510,6 +507,11 @@ func (m *Model) SelectedItemIsToggled() bool {
 // SetNoLimit allows all items in a list to be toggled.
 func (m *Model) SetNoLimit() {
 	m.limit = -1
+}
+
+// SetSelectNone renders a non-selectable list.
+func (m *Model) SetSelectNone() {
+	m.limit = 0
 }
 
 // SetLimit sets the max number of items that can be toggled.
@@ -773,8 +775,8 @@ func (m Model) itemsAsFilterItems() filteredItems {
 
 // Set keybindings according to the filter state.
 func (m *Model) updateKeybindings() {
-	switch m.filterState {
-	case Filtering:
+	switch {
+	case m.filterState == Filtering:
 		m.KeyMap.CursorUp.SetEnabled(false)
 		m.KeyMap.CursorDown.SetEnabled(false)
 		m.KeyMap.NextPage.SetEnabled(false)
@@ -784,7 +786,8 @@ func (m *Model) updateKeybindings() {
 		m.KeyMap.Filter.SetEnabled(false)
 		m.KeyMap.ClearFilter.SetEnabled(false)
 		m.KeyMap.CancelWhileFiltering.SetEnabled(true)
-		m.KeyMap.AcceptWhileFiltering.SetEnabled(m.FilterInput.Value() != "")
+		m.KeyMap.RemoveItem.SetEnabled(false)
+		m.KeyMap.InsertItem.SetEnabled(false)
 		m.KeyMap.Quit.SetEnabled(false)
 		m.KeyMap.ShowFullHelp.SetEnabled(false)
 		m.KeyMap.CloseFullHelp.SetEnabled(false)
@@ -800,6 +803,9 @@ func (m *Model) updateKeybindings() {
 
 		m.KeyMap.GoToStart.SetEnabled(hasItems)
 		m.KeyMap.GoToEnd.SetEnabled(hasItems)
+
+		m.KeyMap.RemoveItem.SetEnabled(true)
+		m.KeyMap.InsertItem.SetEnabled(true)
 
 		m.KeyMap.Filter.SetEnabled(m.filteringEnabled && hasItems)
 		m.KeyMap.ClearFilter.SetEnabled(m.filterState == FilterApplied)

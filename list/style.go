@@ -42,29 +42,28 @@ type Styles struct {
 // DefaultStyles returns a set of default style definitions for this list
 // component.
 func DefaultStyles() (s Styles) {
-	verySubduedColor := lipgloss.AdaptiveColor{Light: "#DDDADA", Dark: "#3C3C3C"}
-	subduedColor := lipgloss.AdaptiveColor{Light: "#9B9B9B", Dark: "#5C5C5C"}
+	verySubduedColor := lipgloss.AdaptiveColor{Light: "#EEEEEE", Dark: "#444444"}
+	subduedColor := lipgloss.AdaptiveColor{Light: "#BCBCBC", Dark: "#626262"}
 
 	s.TitleBar = lipgloss.NewStyle().Padding(0, 0, 0, 2)
 
 	s.Title = lipgloss.NewStyle().
-		Background(lipgloss.Color("62")).
-		Foreground(lipgloss.Color("230")).
+		Foreground(lipgloss.Color("#AFFFFF")).
 		Padding(0, 1)
 
 	s.Spinner = lipgloss.NewStyle().
 		Foreground(lipgloss.AdaptiveColor{Light: "#8E8E8E", Dark: "#747373"})
 
 	s.FilterPrompt = lipgloss.NewStyle().
-		Foreground(lipgloss.AdaptiveColor{Light: "#04B575", Dark: "#ECFD65"})
+		Foreground(lipgloss.AdaptiveColor{Light: "#04B575", Dark: "#FFFFAF"})
 
 	s.FilterCursor = lipgloss.NewStyle().
-		Foreground(lipgloss.AdaptiveColor{Light: "#EE6FF8", Dark: "#EE6FF8"})
+		Foreground(lipgloss.AdaptiveColor{Light: "#FF87FF", Dark: "#FF87FF"})
 
 	s.DefaultFilterCharacterMatch = lipgloss.NewStyle().Underline(true)
 
 	s.StatusBar = lipgloss.NewStyle().
-		Foreground(lipgloss.AdaptiveColor{Light: "#A49FA5", Dark: "#777777"}).
+		Foreground(lipgloss.AdaptiveColor{Light: "#BCBCBC", Dark: "#626262"}).
 		Padding(0, 0, 0, 2)
 
 	s.StatusEmpty = lipgloss.NewStyle().Foreground(subduedColor)
@@ -84,7 +83,7 @@ func DefaultStyles() (s Styles) {
 	s.HelpStyle = lipgloss.NewStyle().Padding(0, 0, 0, 2)
 
 	s.ActivePaginationDot = lipgloss.NewStyle().
-		Foreground(lipgloss.AdaptiveColor{Light: "#847A85", Dark: "#979797"}).
+		Foreground(lipgloss.AdaptiveColor{Light: "#5FAFFF", Dark: "#5FAFFF"}).
 		SetString(bullet)
 
 	s.InactivePaginationDot = lipgloss.NewStyle().
