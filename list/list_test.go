@@ -88,7 +88,7 @@ func TestList(t *testing.T) {
 	del.SetListType(Ol)
 	//del.ShowDescription = false
 	l := New(items, del, w, h)
-	l.SetLimit(-1)
+	l.SetLimit(2)
 	l.SetShowStatusBar(false)
 	//l.SetNoLimit()
 	l.SetShowTitle(true)

@@ -466,7 +466,13 @@ func (m *Model) ToggleItem() {
 	if _, ok := m.toggledItems[idx]; ok {
 		delete(m.toggledItems, idx)
 	} else {
-		m.toggledItems[idx] = struct{}{}
+		no := m.limit
+		if m.limit == -1 {
+			no = len(m.Items())
+		}
+		if len(m.toggledItems) < no {
+			m.toggledItems[idx] = struct{}{}
+		}
 	}
 }
 
