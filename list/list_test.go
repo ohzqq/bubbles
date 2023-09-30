@@ -85,7 +85,7 @@ func TestList(t *testing.T) {
 	//println(h)
 
 	del := NewDefaultDelegate()
-	//del.SetListType(Ol)
+	del.SetListType(Ol)
 	//del.ShowDescription = false
 	l := New(items, del, w, h)
 	l.SetLimit(-1)

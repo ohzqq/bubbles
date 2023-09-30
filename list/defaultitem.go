@@ -73,8 +73,8 @@ func NewDefaultItemStyles() (s DefaultItemStyles) {
 	s.DimmedDesc = s.DimmedTitle.Copy().
 		Foreground(lipgloss.AdaptiveColor{Light: "#C2B8C2", Dark: "#4D4D4D"})
 
-	s.FilterMatch = lipgloss.NewStyle().
-		Foreground(lipgloss.AdaptiveColor{Light: "#5FAFFF", Dark: "#AFFFFF"})
+	s.FilterMatch = lipgloss.NewStyle(). //Underline(true)
+						Foreground(lipgloss.AdaptiveColor{Light: "#5FAFFF", Dark: "#AFFFFF"})
 
 	s.Prefix = lipgloss.NewStyle().
 		Foreground(lipgloss.AdaptiveColor{Light: "#FF87FF", Dark: "#FFAFFF"})
@@ -246,7 +246,7 @@ func (d DefaultDelegate) Render(w io.Writer, m Model, index int, item Item) {
 		if isFiltered {
 			// Highlight matches
 			unmatched := s.SelectedTitle.Inline(true)
-			matched := unmatched.Copy().Inherit(s.FilterMatch)
+			matched := s.FilterMatch
 			title = lipgloss.StyleRunes(title, matchedRunes, matched, unmatched)
 		}
 		title = s.SelectedTitle.Render(title)
@@ -255,7 +255,7 @@ func (d DefaultDelegate) Render(w io.Writer, m Model, index int, item Item) {
 		if isFiltered {
 			// Highlight matches
 			unmatched := s.NormalTitle.Inline(true)
-			matched := unmatched.Copy().Inherit(s.FilterMatch)
+			matched := s.FilterMatch
 			title = lipgloss.StyleRunes(title, matchedRunes, matched, unmatched)
 		}
 		title = s.NormalTitle.Render(title)
