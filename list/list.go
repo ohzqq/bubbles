@@ -176,6 +176,8 @@ type Model struct {
 	FilterInput textinput.Model
 	filterState FilterState
 
+	listType ListType
+
 	// How long status messages should stay visible. By default this is
 	// 1 second.
 	StatusMessageLifetime time.Duration
@@ -507,7 +509,7 @@ func (m *Model) SelectedItemIsToggled() bool {
 
 // SetNoLimit allows all items in a list to be toggled.
 func (m *Model) SetNoLimit() {
-	m.noLimit = true
+	m.limit = -1
 }
 
 // SetLimit sets the max number of items that can be toggled.
@@ -520,16 +522,21 @@ func (m Model) Limit() int {
 	return m.limit
 }
 
-// MultiSelect is a convenience method to check if more than one item can be
+// MultiSelectable is a convenience method to check if more than one item can be
 // toggled.
-func (m Model) MultiSelect() bool {
-	if m.noLimit {
-		return true
-	}
+func (m Model) MultiSelectable() bool {
 	if m.limit > 1 {
 		return true
 	}
+	if m.limit == -1 {
+		return true
+	}
 	return false
+}
+
+// Selectable returns if a list's items can be toggled.
+func (m Model) Selectable() bool {
+	return m.limit != 0
 }
 
 // MatchesForItem returns rune positions matched by the current filter, if any.

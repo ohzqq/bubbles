@@ -3,6 +3,7 @@ package list
 import (
 	"fmt"
 	"io"
+	"strconv"
 	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -10,6 +11,22 @@ import (
 	"github.com/muesli/reflow/truncate"
 	"github.com/ohzqq/bubbles/key"
 )
+
+// ListType describes if the list is ordered or unordered.
+type ListType int
+
+const (
+	Ul ListType = iota // unordered list
+	Ol                 // ordered list
+)
+
+// String returns a human-readable string of the list type.
+func (f ListType) String() string {
+	return [...]string{
+		"unordered list",
+		"ordered list",
+	}[f]
+}
 
 // DefaultItemStyles defines styling for a default list item.
 // See DefaultItemView for when these come into play.
@@ -43,14 +60,11 @@ func NewDefaultItemStyles() (s DefaultItemStyles) {
 		Foreground(lipgloss.AdaptiveColor{Light: "#A49FA5", Dark: "#777777"})
 
 	s.SelectedTitle = lipgloss.NewStyle().
-		Foreground(lipgloss.AdaptiveColor{Light: "#afffff", Dark: "#afffaf"}).
+		Foreground(lipgloss.AdaptiveColor{Light: "#AFFF87", Dark: "#AFFFAF"}).
 		Padding(0, 0, 0, 1)
 
-	s.Prefix = lipgloss.NewStyle().
-		Foreground(lipgloss.AdaptiveColor{Light: "#EE6FF8", Dark: "#EE6FF8"})
-
 	s.SelectedDesc = s.SelectedTitle.Copy().
-		Foreground(lipgloss.AdaptiveColor{Light: "#F793FF", Dark: "#AD58B4"})
+		Foreground(lipgloss.AdaptiveColor{Light: "#AF87FF", Dark: "#AFAFFF"})
 
 	s.DimmedTitle = lipgloss.NewStyle().
 		Foreground(lipgloss.AdaptiveColor{Light: "#A49FA5", Dark: "#777777"}).
@@ -59,7 +73,11 @@ func NewDefaultItemStyles() (s DefaultItemStyles) {
 	s.DimmedDesc = s.DimmedTitle.Copy().
 		Foreground(lipgloss.AdaptiveColor{Light: "#C2B8C2", Dark: "#4D4D4D"})
 
-	s.FilterMatch = lipgloss.NewStyle().Underline(true)
+	s.FilterMatch = lipgloss.NewStyle().
+		Foreground(lipgloss.AdaptiveColor{Light: "#5FAFFF", Dark: "#AFFFFF"})
+
+	s.Prefix = lipgloss.NewStyle().
+		Foreground(lipgloss.AdaptiveColor{Light: "#FF87FF", Dark: "#FFAFFF"})
 
 	return s
 }
@@ -90,6 +108,7 @@ type DefaultDelegate struct {
 	UpdateFunc      func(tea.Msg, *Model) tea.Cmd
 	ShortHelpFunc   func() []key.Binding
 	FullHelpFunc    func() [][]key.Binding
+	listType        ListType
 	height          int
 	spacing         int
 }
@@ -97,9 +116,10 @@ type DefaultDelegate struct {
 // NewDefaultDelegate creates a new delegate with default styles.
 func NewDefaultDelegate() DefaultDelegate {
 	return DefaultDelegate{
-		Styles:  NewDefaultItemStyles(),
-		height:  2,
-		spacing: 1,
+		Styles:   NewDefaultItemStyles(),
+		height:   2,
+		spacing:  1,
+		listType: Ul,
 	}
 }
 
@@ -126,6 +146,16 @@ func (d *DefaultDelegate) SetSpacing(i int) {
 // Spacing returns the delegate's spacing.
 func (d DefaultDelegate) Spacing() int {
 	return d.spacing
+}
+
+// SetListType sets the list type: ordered or unordered.
+func (d *DefaultDelegate) SetListType(lt ListType) {
+	d.listType = lt
+}
+
+// ListType returns the list type.
+func (d *DefaultDelegate) ListType() ListType {
+	return d.listType
 }
 
 // Update checks whether the delegate's UpdateFunc is set and calls it.
@@ -172,25 +202,38 @@ func (d DefaultDelegate) Render(w io.Writer, m Model, index int, item Item) {
 
 	// Conditions
 	var (
-		prefix      = " "
+		prefix      string
+		padding     = len(strconv.Itoa(len(m.Items())))
 		isSelected  = index == m.Index()
 		emptyFilter = m.FilterState() == Filtering && m.FilterValue() == ""
 		isFiltered  = m.FilterState() == Filtering || m.FilterState() == FilterApplied
 	)
 
-	if isSelected {
-		prefix = m.prefix
+	// style prefix
+	switch d.listType {
+	case Ol:
+		p := "%" + strconv.Itoa(padding) + "d."
+		prefix = fmt.Sprintf(p, index+1)
+	default:
+		prefix = " "
 	}
 
-	// style prefix
-	if m.noLimit {
+	if m.MultiSelectable() {
 		if _, ok := m.toggledItems[index]; ok {
-			prefix = s.Prefix.Render(m.toggledPrefix)
+			prefix = s.Prefix.Render(m.toggledPrefix + prefix)
 		} else {
-			prefix = s.Prefix.Render(m.untoggledPrefix)
+			prefix = s.Prefix.Render(m.untoggledPrefix + prefix)
 		}
 	}
 
+	if isSelected {
+		if d.listType == Ul && !m.MultiSelectable() {
+			prefix = m.prefix
+		}
+		prefix = s.Prefix.Render(prefix)
+	}
+
+	// style filtered items
 	if isFiltered && index < len(m.filteredItems) {
 		// Get indices of matched characters
 		matchedRunes = m.MatchesForItem(index)
