@@ -462,16 +462,18 @@ func (m Model) SelectedItem() Item {
 
 // ToggleItem toggles the current selected item in a multi-select list.
 func (m *Model) ToggleItem() {
-	idx := m.Index()
-	if _, ok := m.toggledItems[idx]; ok {
-		delete(m.toggledItems, idx)
-	} else {
-		no := m.limit
-		if m.limit == -1 {
-			no = len(m.Items())
-		}
-		if len(m.toggledItems) < no {
-			m.toggledItems[idx] = struct{}{}
+	if m.Selectable() {
+		idx := m.Index()
+		if _, ok := m.toggledItems[idx]; ok {
+			delete(m.toggledItems, idx)
+		} else {
+			no := m.limit
+			if m.limit == -1 {
+				no = len(m.Items())
+			}
+			if len(m.ToggledItems()) < no {
+				m.toggledItems[idx] = struct{}{}
+			}
 		}
 	}
 }

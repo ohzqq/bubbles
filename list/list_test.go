@@ -73,9 +73,9 @@ func (d itemDelegate) Render(w io.Writer, m Model, index int, listItem Item) {
 }
 
 func TestList(t *testing.T) {
-	var items []Item
+	var tItems []Item
 	for _, c := range itemSlice[:10] {
-		items = append(items, newDefaultItem(c))
+		tItems = append(tItems, newDefaultItem(c))
 	}
 
 	w := 100
@@ -87,8 +87,8 @@ func TestList(t *testing.T) {
 	del := NewDefaultDelegate()
 	del.SetListType(Ol)
 	//del.ShowDescription = false
-	l := New(items, del, w, h)
-	l.SetLimit(2)
+	l := New(tItems, del, w, h)
+	l.SetLimit(3)
 	l.SetShowStatusBar(false)
 	//l.SetNoLimit()
 	l.SetShowTitle(true)
@@ -101,9 +101,14 @@ func TestList(t *testing.T) {
 		t.Error(err)
 	}
 
-	if items := m.ToggledItems(); len(items) != len(m.toggledItems) {
-		t.Errorf("toggled items %v != toggled %v\n", m.toggledItems, items)
-
+	togItems := m.ToggledItems()
+	if len(togItems) != len(m.toggledItems) {
+		t.Errorf("toggled items %v != toggled %v\n", m.toggledItems, togItems)
+	}
+	if m.Selectable() {
+		if m.Limit() > 0 && len(togItems) > m.Limit() {
+			t.Errorf("toggled items %v > limit %v\n", len(togItems), m.Limit())
+		}
 	}
 }
 
