@@ -950,8 +950,10 @@ func (m *Model) handleBrowsing(msg tea.Msg) tea.Cmd {
 			m.cursor = m.Paginator.ItemsOnPage(numItems) - 1
 
 		case key.Matches(msg, m.KeyMap.ToggleItem):
-			m.ToggleItem()
-			m.CursorDown()
+			if m.Selectable() {
+				m.ToggleItem()
+				m.CursorDown()
+			}
 
 		case key.Matches(msg, m.KeyMap.Filter):
 			m.hideStatusMessage()
