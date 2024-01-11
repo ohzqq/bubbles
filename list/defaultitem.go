@@ -207,6 +207,7 @@ func (d DefaultDelegate) Render(w io.Writer, m Model, index int, item Item) {
 		isSelected  = index == m.Index()
 		emptyFilter = m.FilterState() == Filtering && m.FilterValue() == ""
 		isFiltered  = m.FilterState() == Filtering || m.FilterState() == FilterApplied
+		isToggled   = m.ItemIsToggled(item)
 	)
 
 	// style prefix
@@ -219,7 +220,7 @@ func (d DefaultDelegate) Render(w io.Writer, m Model, index int, item Item) {
 	}
 
 	if m.MultiSelectable() {
-		if _, ok := m.toggledItems[index]; ok {
+		if isToggled {
 			prefix = s.Prefix.Render(m.toggledPrefix + prefix)
 		} else {
 			prefix = s.Prefix.Render(m.untoggledPrefix + prefix)

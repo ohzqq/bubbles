@@ -463,19 +463,40 @@ func (m Model) SelectedItem() Item {
 // ToggleItem toggles the current selected item in a multi-select list.
 func (m *Model) ToggleItem() {
 	if m.Selectable() {
-		idx := m.Index()
+		item := m.SelectedItem()
+		idx := m.ItemIndex(item)
+		//idx := m.Index()
 		if _, ok := m.toggledItems[idx]; ok {
 			delete(m.toggledItems, idx)
 		} else {
-			no := m.limit
+			limit := m.limit
 			if m.limit == -1 {
-				no = len(m.Items())
+				limit = len(m.Items())
 			}
-			if len(m.ToggledItems()) < no {
+			if len(m.ToggledItems()) < limit {
 				m.toggledItems[idx] = struct{}{}
 			}
 		}
 	}
+}
+
+// ItemIsToggled returns whether or not an item is toggled.
+func (m *Model) ItemIsToggled(item Item) bool {
+	idx := m.ItemIndex(item)
+	if _, ok := m.toggledItems[idx]; ok {
+		return true
+	}
+	return false
+}
+
+// ItemIndex returns the index of an item from the slice of total items.
+func (m Model) ItemIndex(item Item) int {
+	for idx, i := range m.Items() {
+		if i.FilterValue() == item.FilterValue() {
+			return idx
+		}
+	}
+	return 0
 }
 
 // ToggledItems returns the slice of item indices.

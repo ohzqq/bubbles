@@ -32,6 +32,10 @@ func (m testList) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	//case tea.WindowSizeMsg:
 	//m.SetSize(msg.Width, msg.Height)
 	//m.SetHeight(msg.Height)
+	//case tea.KeyMsg:
+	//if msg.String() == "enter" {
+	//return m, tea.Quit
+	//}
 	//}
 	l, cmd := m.Model.Update(msg)
 	m.Model = &l
@@ -85,7 +89,7 @@ func TestList(t *testing.T) {
 	//println(h)
 
 	del := NewDefaultDelegate()
-	del.SetListType(Ol)
+	del.SetListType(Ul)
 	//del.ShowDescription = false
 	l := New(tItems, del, w, h)
 	l.SetLimit(3)
@@ -109,6 +113,10 @@ func TestList(t *testing.T) {
 		if m.Limit() > 0 && len(togItems) > m.Limit() {
 			t.Errorf("toggled items %v > limit %v\n", len(togItems), m.Limit())
 		}
+	}
+	for _, item := range togItems {
+		println(item)
+		fmt.Printf("%v\n", tItems[item])
 	}
 }
 
